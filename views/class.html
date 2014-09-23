@@ -1,0 +1,406 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblClass" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>                        
+                        <th>Course</th>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Teacher</th>
+                        <th>Room</th>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmClass" id="frmClass" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classCourse">Course</label>
+                    <div class="col-xs-4">
+                        <select id="classCourse" name="classCourse" class="form-control" >
+                            <option value="0">Select course...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classDay">Day</label>
+                    <div class="col-xs-4">
+                        <select id="classDay" name="classDay" class="form-control" >
+                            <option value="0">Select day...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classTime">Time</label>
+                    <div class="col-xs-4">
+                        <select id="classTime" name="classTime" class="form-control" >
+                            <option value="0">Select start time...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classTeacher">Teacher</label>
+                    <div class="col-xs-4">
+                        <select id="classTeacher" name="classTeacher" class="form-control" >
+                            <option value="0">Select teacher...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classRoom">Room</label>
+                    <div class="col-xs-4">
+                        <select id="classRoom" name="classRoom" class="form-control" >
+                            <option value="0">Select room...</option>
+                        </select>
+                    </div>
+                </div>                
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classStartDate">Start Date</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control datepicker" id="classStartDate" name="classStartDate" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="classEndDate">End Date</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control datepicker" id="classEndDate" name="classEndDate" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <table border="1" id="tblEnrolledStudents" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2">Enrolled Student(s)</th>
+                    </tr>
+                    <tr>
+                        <th>Last Name</th>
+                        <th>First Name</th>                        
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <form name="frmEnroll" id="frmEnroll" class="form-horizontal" role="form">
+
+                <input type="hidden" name="hdnClassId" id="hdnClassId" value="0"/>
+                <input type="hidden" name="hdnStudentId" id="hdnStudentId" value="0"/>
+
+                <div class="row" >                    
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control" id="enrollName" name="enrollName" placeholder="student name" />
+                    </div>
+                    <div class="col-xs-2">
+                        <button id="btnEnroll" class="btn btn-primary btn-sm" disabled="disabled">Enroll</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dtClass = $('#tblClass').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/class/getClassList.php',
+            "columns": [
+                {"data": "course"},
+                {"data": "day"},
+                {"data": "time"},
+                {"data": "teacher"},
+                {"data": "room"}
+            ]
+        });
+
+        $('#frmClass input.datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        }).on('changeDate', function(e) {
+            $(this).datepicker('hide');
+        });
+
+        // populate course drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/class/getCourseList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.id).text(item.name).appendTo('#frmClass select#classCourse');
+            });  // .each loop 
+        });
+
+        // populate DOW drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/class/getDOWList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.dow).text(item.dow).appendTo('#frmClass select#classDay');
+            });  // .each loop 
+        });
+
+        // populate start time drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/class/getStartTimeList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.time).text(item.time).appendTo('#frmClass select#classTime');
+            });  // .each loop 
+        });
+
+        // populate teacher drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/class/getTeacherList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.id).text(item.first_name).appendTo('#frmClass select#classTeacher');
+            });  // .each loop 
+        });
+
+        // populate room drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/class/getRoomList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.id).text(item.name).appendTo('#frmClass select#classRoom');
+            });  // .each loop 
+        });
+
+        function dataTableReload() {
+            dtClass.ajax.reload();
+        }
+
+        $('#tblClass').on("click", "tbody tr", function() {
+            var classId = $(this).attr('id');
+            $.ajax({
+                type: "GET",
+                url: "backend/class/getClassById.php",
+                data: {id: classId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                // populate form                
+                $('#frmClass input#hdnId').val(rec.id);
+                $('#frmClass select#classCourse').val(rec.course);
+                $('#frmClass select#classDay').val(rec.day);
+                $('#frmClass select#classTime').val(rec.time);
+                $('#frmClass select#classTeacher').val(rec.teacher);
+                $('#frmClass select#classRoom').val(rec.room);
+                $('#frmClass input#classStartDate').val(rec.start);
+                $('#frmClass input#classEndDate').val(rec.end);
+
+                $('#frmEnroll input#hdnClassId').val(rec.id);
+
+                // display enrolled students for this class
+                $('#tblEnrolledStudents tbody').find('tr').remove();
+                var enrolledStudents = rec.students;
+                $.each(enrolledStudents, function(i, es) {
+                    $('<tr>').html("<td>" + es.last_name + "</td><td>" + es.first_name + "</td>").appendTo('#tblEnrolledStudents tbody');
+                });  // .each loop
+                $('#frmEnroll button#btnEnroll').prop('disabled', false);
+            });
+            return false;
+        });
+
+        $('#frmClass #btnClear').on('click', function() {
+            $('#frmClass input#hdnId').val(0);
+            $('#tblEnrolledStudents tbody').find('tr').remove();
+            $('#frmClass').trigger("reset");
+            $('#frmEnroll').trigger("reset");
+            $('#frmEnroll input#hdnClassId').val(0);
+            $('#frmEnroll input#hdnStudentId').val(0);
+            $('#frmEnroll button#btnEnroll').prop('disabled', true);
+            $('#frmEnroll input').parent('div').removeClass('has-error');
+            return false;
+        });
+
+        // save class record
+        $('#frmClass #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmClass select#classCourse').val() === '0') {
+                $('#frmClass select#classCourse').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a course for this class.</span>');
+                hasError = true;
+            } else {
+                if ($('#frmClass select#classDay').val() === '0') {
+                    $('#frmClass select#classDay').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a day for this class.</span>');
+                    hasError = true;
+                } else {
+                    if ($('#frmClass select#classTime').val() === '0') {
+                        $('#frmClass select#classTime').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a start time for this class.</span>');
+                        hasError = true;
+                    } else {
+                        if ($('#frmClass select#classTeacher').val() === '0') {
+                            $('#frmClass select#classTeacher').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a teacher for this class.</span>');
+                            hasError = true;
+                        } else {
+                            if ($('#frmClass select#classRoom').val() === '0') {
+                                $('#frmClass select#classRoom').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a room for this class.</span>');
+                                hasError = true;
+                            } else {
+                                if ($('#frmClass input#classStartDate').val() === '' || !isValidDate($('#frmClass input#classStartDate').val())) {
+                                    $('#frmClass input#classStartDate').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a valid start date for this class.</span>');
+                                    hasError = true;
+                                } else {
+                                    if ($('#frmClass input#classEndDate').val() === '' || !isValidDate($('#frmClass input#classEndDate').val())) {
+                                        $('#frmClass input#classEndDate').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a valid end date for this class.</span>');
+                                        hasError = true;
+                                    } else {
+                                        if (moment($('#frmClass input#classEndDate').val(), 'YYYY-MM-DD').isBefore(moment($('#frmClass input#classStartDate').val(), 'YYYY-MM-DD'))) {
+                                            $('#frmClass input#classEndDate').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please select a valid end date for this class.</span>');
+                                            hasError = true;
+                                        } else {
+                                            //next validation check, if any
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/class/saveClass.php',
+                    data: $('#frmClass').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+
+            return false;
+
+        }); // save class record
+
+        // student list auto-complete
+        $('input[name="enrollName"]').autocomplete({
+            source: "backend/class/getStudentList.php",
+            minLength: 1,
+            select: function( event, ui ) {                
+                //console.log('selected id='+ui.item.id);
+                $('#frmEnroll input#hdnStudentId').val(ui.item.id);
+				return false;
+            }
+        });
+
+        // student enrollment
+        $('#frmEnroll #btnEnroll').on('click', function() {
+            var hasError = false;
+            $('#frmEnroll input').parent('div').removeClass('has-error');
+
+            //---------- start of validation checks
+            if ($('#frmEnroll input#enrollName').val() === '' || $('#frmEnroll input#hdnStudentId').val() === '0') {
+                $('#frmEnroll input#enrollName').parent('div').addClass('has-error');
+                hasError = true;
+            } else {
+                // next validation check goes here                
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                var classId = $('#frmEnroll input#hdnClassId').val();
+                $('#frmEnroll input').parent('div').removeClass('has-error');
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/class/enrollStudent.php',
+                    data: $('#frmEnroll').serialize()
+                }).done(function(data) {
+                    $('#frmEnroll').trigger("reset");
+                    $('#frmEnroll input#hdnClassId').val(0);
+                    $('#frmEnroll input#hdnStudentId').val(0);
+                    $('#frmEnroll button#btnEnroll').prop('disabled', true);
+
+                    // refresh display
+                    $.ajax({
+                        type: "GET",
+                        url: "backend/class/getClassById.php",
+                        data: {id: classId}
+                    }).done(function(data) {
+                        var dataObj = $.parseJSON(data);
+                        var rec = dataObj.data[0];
+                        $('#frmClass input#hdnId').val(rec.id);
+                        $('#frmClass select#classCourse').val(rec.course);
+                        $('#frmClass select#classDay').val(rec.day);
+                        $('#frmClass select#classTime').val(rec.time);
+                        $('#frmClass select#classTeacher').val(rec.teacher);
+                        $('#frmClass select#classRoom').val(rec.room);
+                        $('#frmClass input#classStartDate').val(rec.start);
+                        $('#frmClass input#classEndDate').val(rec.end);
+                        $('#frmEnroll input#hdnClassId').val(rec.id);
+                        $('#tblEnrolledStudents tbody').find('tr').remove();
+                        var enrolledStudents = rec.students;
+                        $.each(enrolledStudents, function(i, es) {
+                            $('<tr>').html("<td>" + es.last_name + "</td><td>" + es.first_name + "</td>").appendTo('#tblEnrolledStudents tbody');
+                        });  // .each loop
+                        $('#frmEnroll button#btnEnroll').prop('disabled', false);
+                    });
+                });
+            }
+
+            return false;
+        });  // student enrollment
+
+
+    });
+
+    function isValidDate(dateString) {
+        var rv = false;
+        var t1 = new Date(dateString).toString();
+        var t2 = Date.parse(dateString);
+        var t3 = moment(dateString, 'YYYY-MM-DD').isValid();
+        var t4 = true; //moment(dateString, 'YYYY-MM-DD').isBefore(moment().format('YYYY-MM-DD'));
+        if (t1 !== 'Invalid Date' && t2 !== 'NaN' && t3 === true && t4 === true) {
+            rv = true;
+        }
+        return rv;
+    }
+
+</script>

@@ -1,0 +1,321 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblFamily" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>                        
+                        <td>Contact Last Name</td>
+                        <td>Contact First Name</td>
+                        <td>Phone Number</td>
+                        <td>E-Mail Address</td>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmFamily" id="frmFamily" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="familyFirstName">First Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="familyFirstName" name="familyFirstName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="familyLastName">Last Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="familyLastName" name="familyLastName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="familyPhoneNumber">Phone Number</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="familyPhoneNumber" name="familyPhoneNumber" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="familyEmailAddress">E-Mail Address</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="familyEmailAddress" name="familyEmailAddress" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="familyPayMethod">Pay Method</label>
+                    <div class="col-xs-4">
+                        <select id="familyPayMethod" name="familyPayMethod" class="form-control" >
+                            <!-- <option value="0">Select pay method...</option> -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <table border="1" id="tblRegStu" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="4">Registered Student(s)</th>
+                    </tr>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>DOB</th>
+                        <th>Reg. Date</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <form name="frmRegister" id="frmRegister" class="form-horizontal" role="form">
+
+                <input type="hidden" name="hdnFamilyId" id="hdnFamilyId" value="0"/>
+
+                <div class="row" >                    
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control" id="registerFirstName" name="registerFirstName" placeholder="first name" />
+                    </div>
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control" id="registerLastName" name="registerLastName" placeholder="last name" />
+                    </div>
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control datepicker" id="registerDOB" name="registerDOB" placeholder="dob yyyy-mm-dd" />
+                    </div>                
+                    <div class="col-xs-2">
+                        <button id="btnRegister" class="btn btn-primary btn-sm" disabled="disabled">Register</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dtFamily = $('#tblFamily').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/family/getFamilyList.php',
+            "columns": [
+                {"data": "last_name"},
+                {"data": "first_name"},
+                {"data": "phone_number_1"},
+                {"data": "email_address_1"}
+            ]
+        });
+
+        $('#frmRegister input.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            viewMode: 2  // years
+        }).on('changeDate', function(e) {
+            if (e.viewMode === 'days') {
+                $(this).datepicker('hide');
+            }
+        });
+
+        // populate pay method drop-down
+        $.ajax({
+            type: "GET",
+            url: "backend/family/getPayMethodList.php"
+        }).done(function(data) {
+            var items = $.parseJSON(data).data;
+            $.each(items, function(i, item) {
+                $('<option>').val(item.id).text(item.method_name).appendTo('#frmFamily select#familyPayMethod');
+            });  // .each loop 
+        });
+
+        function dataTableReload() {
+            dtFamily.ajax.reload();
+        }
+
+        $('#tblFamily').on("click", "tbody tr", function() {
+            var familyId = $(this).attr('id');
+            //console.log('row dbl-clicked id=' + familyId);            
+            $.ajax({
+                type: "GET",
+                url: "backend/family/getFamilyById.php",
+                data: {id: familyId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                //populate form                
+                $('#frmFamily input#hdnId').val(rec.id);
+                $('#frmFamily input#familyFirstName').val(rec.first_name);
+                $('#frmFamily input#familyLastName').val(rec.last_name);
+                $('#frmFamily input#familyPhoneNumber').val(rec.phone_number_1);
+                $('#frmFamily input#familyEmailAddress').val(rec.email_address_1);
+                $('#frmFamily select#familyPayMethod').val(rec.paymethod_id);
+                $('#frmRegister input#hdnFamilyId').val(rec.id);
+
+                // display registered students for this family
+                $('#tblRegStu tbody').find('tr').remove();
+                var regstudents = rec.students;
+                $.each(regstudents, function(i, rs) {
+                    $('<tr>').html("<td>" + rs.first_name + "</td><td>" + rs.last_name + "</td><td>" + rs.date_of_birth + "</td><td>" + rs.registration_date + "</td>").appendTo('#tblRegStu tbody');
+                });  // .each loop
+
+                // enable register button
+                $('#frmRegister button#btnRegister').prop('disabled', false);
+
+            });
+            return false;
+        });
+
+        $('#frmFamily #btnClear').on('click', function() {
+            $('#frmFamily input#hdnId').val(0);
+            $('#tblRegStu tbody').find('tr').remove();
+            $('#frmFamily').trigger("reset");
+            $('#frmRegister').trigger("reset");
+            $('#frmRegister input#hdnFamilyId').val(0);
+            $('#frmRegister button#btnRegister').prop('disabled', true);
+            $('#frmRegister input').parent('div').removeClass('has-error');
+            return false;
+        });
+
+
+        $('#frmFamily #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmFamily input#familyFirstName').val() === '') {
+                $('#frmFamily input#familyFirstName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in family contact first name.</span>');
+                hasError = true;
+            } else {
+                if ($('#frmFamily input#familyLastName').val() === '') {
+                    $('#frmFamily input#familyLastName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in family last name.</span>');
+                    hasError = true;
+                } else {
+                    if ($('#frmFamily input#familyPhoneNumber').val() === '') {
+                        $('#frmFamily input#familyPhoneNumber').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in contact phone number.</span>');
+                        hasError = true;
+                    } else {
+                        // next validation check goes here
+                    }
+                }
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/family/saveFamily.php',
+                    data: $('#frmFamily').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+            return false;
+
+        });
+
+        $('#frmRegister #btnRegister').on('click', function() {
+            var hasError = false;
+            $('#frmRegister input').parent('div').removeClass('has-error');
+
+            //---------- start of validation checks
+            if ($('#frmRegister input#registerFirstName').val() === '') {
+                $('#frmRegister input#registerFirstName').parent('div').addClass('has-error');
+                hasError = true;
+            } else {
+                if ($('#frmRegister input#registerLastName').val() === '') {
+                    $('#frmRegister input#registerLastName').parent('div').addClass('has-error');
+                    hasError = true;
+                } else {
+                    if ($('#frmRegister input#registerDOB').val() === '' || !isValidDate($('#frmRegister input#registerDOB').val())) {
+                        $('#frmRegister input#registerDOB').parent('div').addClass('has-error');
+                        hasError = true;
+                    } else {
+                        // next validation check goes here
+                    }
+                }
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                var familyId = $('#frmRegister input#hdnFamilyId').val();
+                $('#frmRegister input').parent('div').removeClass('has-error');
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/family/registerStudent.php',
+                    data: $('#frmRegister').serialize()
+                }).done(function(data) {
+                    $('#frmRegister').trigger("reset");
+                    $('#frmRegister input#hdnFamilyId').val(0);
+                    $('#frmRegister button#btnRegister').prop('disabled', true);
+
+                    // refresh display
+                    $.ajax({
+                        type: "GET",
+                        url: "backend/family/getFamilyById.php",
+                        data: {id: familyId}
+                    }).done(function(data) {
+                        var dataObj = $.parseJSON(data);
+                        var rec = dataObj.data[0];
+                        $('#frmFamily input#hdnId').val(rec.id);
+                        $('#frmFamily input#familyFirstName').val(rec.first_name);
+                        $('#frmFamily input#familyLastName').val(rec.last_name);
+                        $('#frmFamily input#familyPhoneNumber').val(rec.phone_number_1);
+                        $('#frmFamily input#familyEmailAddress').val(rec.email_address_1);
+                        $('#frmFamily select#familyPayMethod').val(rec.paymethod_id);
+                        $('#frmRegister input#hdnFamilyId').val(rec.id);
+                        $('#tblRegStu tbody').find('tr').remove();
+                        var regstudents = rec.students;
+                        $.each(regstudents, function(i, rs) {
+                            $('<tr>').html("<td>" + rs.first_name + "</td><td>" + rs.last_name + "</td><td>" + rs.date_of_birth + "</td><td>" + rs.registration_date + "</td>").appendTo('#tblRegStu tbody');
+                        });
+                        $('#frmRegister button#btnRegister').prop('disabled', false);
+                    });
+
+                });
+            }
+
+            return false;
+        });
+
+
+    });
+
+    function isValidDate(dateString) {
+        var rv = false;
+        //console.log('passedin::'+dateString);
+        var t1 = new Date(dateString).toString();
+        //console.log('test1::'+t1);        
+        var t2 = Date.parse(dateString);
+        //console.log('test2::'+t2);        
+        var t3 = moment(dateString, 'YYYY-MM-DD').isValid();
+        var t4 = moment(dateString, 'YYYY-MM-DD').isBefore(moment().format('YYYY-MM-DD'));
+        //console.log('test3::'+t3);
+        if (t1 !== 'Invalid Date' && t2 !== 'NaN' && t3 === true && t4 === true) {
+            rv = true;
+        }
+        return rv;
+    }
+</script>

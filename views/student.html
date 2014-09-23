@@ -1,0 +1,238 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblStudent" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>                        
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>Age</th>
+                        <th>Reg. Date</th>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmStudent" id="frmStudent" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentFirstName">First Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="studentFirstName" name="studentFirstName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentLastName">Last Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="studentLastName" name="studentLastName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentDOB">Date of Birth</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control datepickerDOB" id="studentDOB" name="studentDOB" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentRegDate">Registration Date</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control datepickerReg" id="studentRegDate" name="studentRegDate" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentActive">Active</label>
+                    <div class="col-xs-1 pull-left">
+                        <input type="checkbox" class="form-control" id="studentActive" name="studentActive" />
+                    </div>
+                </div>
+
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="studentFamilyContact">Family Contact</label>
+                    <div class="col-xs-10">
+                        <input type="text" class="form-control" id="studentFamilyContact" name="studentFamilyContact" readonly="readonly"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <table border="1" id="tblClasses" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="5">Enrolled Class(es)</th>
+                    </tr>
+                    <tr>
+                        <th>Course</th>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Teacher</th>
+                        <th>Room</th>
+                        <!--
+                        <th>Start</th>
+                        <th>End</th>
+                        -->
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+        </div>
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dtStudent = $('#tblStudent').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/student/getStudentList.php',
+            "columns": [
+                {"data": "last_name"},
+                {"data": "first_name"},
+                {"data": "age"},
+                {"data": "registration_date"}
+            ]
+        });
+
+        $('#frmStudent input.datepickerDOB').datepicker({
+            format: 'yyyy-mm-dd',
+            viewMode: 2  // years
+        }).on('changeDate', function(e) {
+            if (e.viewMode === 'days') {
+                $(this).datepicker('hide');
+            }
+        });
+        $('#frmStudent input.datepickerReg').datepicker({
+            format: 'yyyy-mm-dd'
+        }).on('changeDate', function(e) {
+            $(this).datepicker('hide');
+        });
+
+        function dataTableReload() {
+            dtStudent.ajax.reload();
+        }
+
+        $('#tblStudent').on("click", "tbody tr", function() {
+            var studentId = $(this).attr('id');
+            $.ajax({
+                type: "GET",
+                url: "backend/student/getStudentById.php",
+                data: {id: studentId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                // populate form                
+                $('#frmStudent input#hdnId').val(rec.id);
+                $('#frmStudent input#studentFirstName').val(rec.first_name);
+                $('#frmStudent input#studentLastName').val(rec.last_name);
+                $('#frmStudent input#studentDOB').val(rec.date_of_birth);
+                $('#frmStudent input#studentRegDate').val(rec.registration_date);
+                $('#frmStudent input#studentActive').prop('checked', function() {
+                    return rec.active == 1;
+                });
+
+                // display family contact info (name,phone,email)
+                var contact = rec.family.name + ' ' + rec.family.phone + ' ' + rec.family.email;
+                $('#frmStudent input#studentFamilyContact').val(contact);
+
+                // display enrolled classes for this student
+                $('#tblClasses tbody').find('tr').remove();
+                var regclasses = rec.classes;
+                $.each(regclasses, function(i, rc) {
+                    $('<tr>').html("<td>" + rc.course + "</td><td>" + rc.day + "</td><td>" + rc.time + "</td><td>" + rc.teacher + "</td><td>" + rc.room + "</td>").appendTo('#tblClasses tbody');
+                });  // .each loop
+
+            });
+            return false;
+        });
+
+        $('#frmStudent #btnClear').on('click', function() {
+            $('#frmStudent input#hdnId').val(0);
+            $('#tblClasses tbody').find('tr').remove();
+            $('#frmStudent').trigger("reset");
+            return false;
+        });
+
+
+        $('#frmStudent #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmStudent input#studentFirstName').val() === '') {
+                $('#frmStudent input#studentFirstName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in first name.</span>');
+                hasError = true;
+            } else {
+                if ($('#frmStudent input#studentLastName').val() === '') {
+                    $('#frmStudent input#studentLastName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in last name.</span>');
+                    hasError = true;
+                } else {
+                    if ($('#frmStudent input#studentDOB').val() === '' || !isValidDate($('#frmStudent input#studentDOB').val())) {
+                        $('#frmStudent input#studentDOB').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please enter a valid birth date.</span>');
+                        hasError = true;
+                    } else {
+                        if ($('#frmStudent input#studentRegDate').val() === '' || !isValidDate($('#frmStudent input#studentRegDate').val())) {
+                            $('#frmStudent input#studentRegDate').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please enter a valid registration date.</span>');
+                            hasError = true;
+                        } else {
+                            // next validation check goes here
+                        }
+                    }
+                }
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/student/saveStudent.php',
+                    data: $('#frmStudent').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+            return false;
+
+        });
+
+    });
+
+    function isValidDate(dateString) {
+        var rv = false;
+        var t1 = new Date(dateString).toString();
+        var t2 = Date.parse(dateString);
+        var t3 = moment(dateString, 'YYYY-MM-DD').isValid();
+        var t4 = moment(dateString, 'YYYY-MM-DD').isBefore(moment().format('YYYY-MM-DD'));
+        if (t1 !== 'Invalid Date' && t2 !== 'NaN' && t3 === true && t4 === true) {
+            rv = true;
+        }
+        return rv;
+    }
+
+</script>

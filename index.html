@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Dancercise</title>
+        
+        <link rel="icon" type="image/x-icon" href="http://dancercise.2fh.co/favicon.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="http://dancercise.2fh.co/favicon.ico">
+
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="css/themes/cupertino/jquery-ui.css" />
+        
+        <link rel="stylesheet" href="css/bootstrap.css" />
+        <link rel="stylesheet" href="css/dataTables.bootstrap.css" />        
+        <link rel="stylesheet" href="js/datepicker/css/datepicker.css" />      
+
+    </head>
+    <body>
+        <div class="container-full pull-left">  <!-- bootstrap container -->
+
+            <div id="divMainTabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+
+                <!-- tab list -->
+                <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all" role="tablist">
+                    <li role="tab" tabindex="0" class="ui-state-default ui-tabs-active ui-state-active ui-corner-top ui-tabs-selected">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/family.html"  id="ui-id-1">Family</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/student.html" id="ui-id-2">Student</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/class.html"   id="ui-id-3">Class</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/course.html"  id="ui-id-4">Course</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/teacher.html" id="ui-id-5">Teacher</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/room.html"    id="ui-id-6">Room</a>
+                    </li>
+                    <li role="tab" tabindex="-1" class="ui-state-default ui-corner-top">
+                        <a class="ui-tabs-anchor" role="presentation" href="views/payment.html" id="ui-id-7">Payment</a>
+                    </li>
+                    <!-- new tabs go here -->
+                </ul>
+
+                <!-- tab panel divs held in views/ -->                                                
+
+            </div>   <!-- divMainTabs -->                                      
+
+        </div>   <!-- bootstrap container  -->
+
+        <!-- 3rd party JS libraries -->
+        <script src="js/jquery-1.10.2.js"></script>
+        <script src="js/jquery-ui-1.10.3.js"></script>
+        <script src="js/DataTables-1.10.1/media/js/jquery.dataTables.js"></script>
+        <script src="js/dataTables.bootstrap.js"></script>
+        <script src="js/datepicker/js/bootstrap-datepicker.js"></script>
+        <script src="js/moment.min.js"></script>
+
+        <!-- Custom JS -->
+        <script>
+            $(document).ready(function() {
+                //console.log("document ready");
+
+                var oTabs = $('#divMainTabs').tabs();
+
+            });
+        </script>
+
+    </body>
+</html>
+
+

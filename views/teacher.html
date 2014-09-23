@@ -1,0 +1,136 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblTeacher" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td>First Name</td>
+                        <td>Last Name</td>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmTeacher" id="frmTeacher" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="teacherFirstName">First Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="teacherFirstName" name="teacherFirstName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="teacherLastName">Last Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="teacherLastName" name="teacherLastName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="teacherActive">Active</label>
+                    <div class="col-xs-1 pull-left">
+                        <input type="checkbox" class="form-control" id="teacherActive" name="teacherActive" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dtTeacher = $('#tblTeacher').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/teacher/getTeacherList.php',
+            "columns": [
+                {"data": "first_name"},
+                {"data": "last_name"}
+            ]
+        });
+
+        function dataTableReload() {
+            dtTeacher.ajax.reload();
+        }
+
+        $('#tblTeacher').on("click", "tbody tr", function() {
+            var teacherId = $(this).attr('id');
+            //console.log('row dbl-clicked id=' + teacherId);            
+            $.ajax({
+                type: "GET",
+                url: "backend/teacher/getTeacherById.php",
+                data: {id: teacherId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                //populate form                
+                $('#frmTeacher input#hdnId').val(rec.id);
+                $('#frmTeacher input#teacherFirstName').val(rec.first_name);
+                $('#frmTeacher input#teacherLastName').val(rec.last_name);
+                $('#frmTeacher input#teacherActive').prop('checked', function() {
+                    return rec.active == 1;
+                });
+
+            });
+            return false;
+        });
+
+        $('#frmTeacher #btnClear').on('click', function() {
+            $('#frmTeacher input#hdnId').val(0);
+            $('#frmTeacher').trigger("reset");
+            return false;
+        });
+
+
+        $('#frmTeacher #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmTeacher input#teacherFirstName').val() === '') {
+                $('#frmTeacher input#teacherFirstName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in first name.</span>');
+                hasError = true;
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/teacher/saveTeacher.php',
+                    data: $('#frmTeacher').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+            return false;
+
+        });
+
+
+    });
+</script>

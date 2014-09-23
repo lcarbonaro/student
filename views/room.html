@@ -1,0 +1,126 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblRoom" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td>Room Name</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmRoom" id="frmRoom" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="roomName">Room Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="roomName" name="roomName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="roomDesc">Description</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="roomDesc" name="roomDesc" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dtRoom = $('#tblRoom').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/room/getRoomList.php',
+            "columns": [
+                {"data": "room_name"},
+                {"data": "room_desc"}
+            ]
+        });
+
+        function dataTableReload() {
+            dtRoom.ajax.reload();
+        }
+
+        $('#tblRoom').on("click", "tbody tr", function() {
+            var roomId = $(this).attr('id');
+            //console.log('row dbl-clicked id=' + roomId);            
+            $.ajax({
+                type: "GET",
+                url: "backend/room/getRoomById.php",
+                data: {id: roomId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                //populate form                
+                $('#frmRoom input#hdnId').val(rec.id);
+                $('#frmRoom input#roomName').val(rec.room_name);
+                $('#frmRoom input#roomDesc').val(rec.room_desc);
+
+            });
+            return false;
+        });
+
+        $('#frmRoom #btnClear').on('click', function() {
+            $('#frmRoom input#hdnId').val(0);
+            $('#frmRoom').trigger("reset");
+            return false;
+        });
+
+
+        $('#frmRoom #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmRoom input#roomName').val() === '') {
+                $('#frmRoom input#roomName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in room name.</span>');
+                hasError = true;
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/room/saveRoom.php',
+                    data: $('#frmRoom').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+            return false;
+
+        });
+
+
+    });
+</script>

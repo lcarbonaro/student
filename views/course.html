@@ -1,0 +1,158 @@
+<div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+    <div class="row row-full-height">
+
+        <div class="col-xs-6">
+            <table id="tblCourse" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <td>Course Name</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>    
+                <!-- tbody will be created via ajax call -->
+            </table>
+        </div>                
+
+        <div class="col-xs-6">
+            <form name="frmCourse" id="frmCourse" class="form-horizontal" role="form" method="POST">
+
+                <input type="hidden" name="hdnId" id="hdnId" value="0"/>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="courseName">Course Name</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="courseName" name="courseName" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="courseDesc">Description</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="courseDesc" name="courseDesc" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="courseClassSizeLimit">Class Size Limit</label>
+                    <div class="col-xs-4">
+                        <input type="number" class="form-control" id="courseClassSizeLimit" name="courseClassSizeLimit" min="1" />
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="courseActive">Active</label>
+                    <div class="col-xs-1 pull-left">
+                        <input type="checkbox" class="form-control" id="courseActive" name="courseActive" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-2 col-xs-4">
+                        <button id="btnSave"  class="btn btn-default btn-primary">Save</button>
+                        <button id="btnClear" class="btn">Clear</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>     <!-- div class=row -->
+</div>     <!-- div class=ui-tabs-panel -->
+
+<script>
+    $(document).ready(function() {
+
+        var dt = $('#tblCourse').DataTable({
+            "bJQueryUI": true,
+            "sScrollY": "450px",
+            "bPaginate": false,
+            "bScrollCollapse": true,
+            "bAutoWidth": true,
+            "ajax": 'backend/course/getCourseList.php',
+            "columns": [
+                {"data": "course_name"},
+                {"data": "course_desc"}
+            ]
+        });
+
+        function dataTableReload() {
+            dt.ajax.reload();
+        }
+
+        $('#tblCourse').on("click", "tbody tr", function() {
+            var courseId = $(this).attr('id');
+            //console.log('row dbl-clicked id=' + courseId);            
+            $.ajax({
+                type: "GET",
+                url: "backend/course/getCourseById.php",
+                data: {id: courseId}
+            }).done(function(data) {
+
+                // parse returned data 
+                var dataObj = $.parseJSON(data);
+                var rec = dataObj.data[0];
+
+                //populate form                
+                $('#frmCourse input#hdnId').val(rec.id);
+                $('#frmCourse input#courseName').val(rec.course_name);
+                $('#frmCourse input#courseDesc').val(rec.course_desc);
+                $('#frmCourse input#courseClassSizeLimit').val(rec.class_size_limit);
+                $('#frmCourse input#courseActive').prop('checked', function() {
+                    return rec.active == 1;
+                });
+
+            });
+            return false;
+        });
+
+        $('#frmCourse #btnClear').on('click', function() {
+            $('#frmCourse input#hdnId').val(0);
+            $('#frmCourse').trigger("reset");
+            return false;
+        });
+
+
+        $('#frmCourse #btnSave').on('click', function() {
+            var hasError = false;
+            $('.error').remove();
+
+            //---------- start of validation checks
+            if ($('#frmCourse input#courseName').val() === '') {
+                $('#frmCourse input#courseName').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in course name.</span>');
+                hasError = true;
+            } else {
+                if ($('#frmCourse input#courseDesc').val() === '') {
+                    $('#frmCourse input#courseDesc').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in course description.</span>');
+                    hasError = true;
+                } else {
+                    if ($('#frmCourse input#courseClassSizeLimit').val() === '' || $('#frmCourse input#courseClassSizeLimit').val() === '0') {
+                        $('#frmCourse input#courseClassSizeLimit').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in class size limit.</span>');
+                        hasError = true;
+                    }
+                }
+            }
+            //---------- end of validation checks
+
+            if (hasError === true) {
+                // nothing
+            } else {
+                $('.error').remove();
+
+                var s = $('#frmCourse').serialize();
+                console.log(s);
+
+                $.ajax({
+                    type: "POST",
+                    url: 'backend/course/saveCourse.php',
+                    data: $('#frmCourse').serialize()
+                }).done(function(data) {
+                    dataTableReload();
+                });
+            }
+            return false;
+
+        });
+
+
+    });
+</script>
