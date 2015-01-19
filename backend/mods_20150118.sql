@@ -18,7 +18,6 @@ ADD COLUMN `course_type` ENUM('Comp','Rec') NOT NULL DEFAULT 'Comp' AFTER `cours
 -- views/student.html
 -- js/notify.min.js       (new - for notifications, for example on saving)
 -- views/family.html
--- views/student.html
 -- views/teacher.html
 -- views/room.html
 -- backend/course/saveCourse.php
