@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblTeacher" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -35,7 +35,7 @@
                 <div class="form-group" >
                     <label class="col-xs-2 control-label" for="teacherActive">Active</label>
                     <div class="col-xs-1 pull-left">
-                        <input type="checkbox" class="form-control" id="teacherActive" name="teacherActive" />
+                        <input type="checkbox" class="form-control" id="teacherActive" name="teacherActive" checked="checked" />
                     </div>
                 </div>
 
@@ -100,6 +100,11 @@
         $('#frmTeacher #btnClear').on('click', function() {
             $('#frmTeacher input#hdnId').val(0);
             $('#frmTeacher').trigger("reset");
+            
+            // added Jan18/2015 (LCC)
+            $('#frmTeacher input#teacherFirstName').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -125,6 +130,11 @@
                     data: $('#frmTeacher').serialize()
                 }).done(function(data) {
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Teacher record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmTeacher #btnClear').trigger( "click" );
+                    
                 });
             }
             return false;

@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblClass" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -88,20 +88,9 @@
                 </div>
 
             </form>
+            
 
-            <table border="1" id="tblEnrolledStudents" class="table table-condensed table-bordered table-responsive table-hover table-striped">
-                <thead>
-                    <tr>
-                        <th colspan="2">Enrolled Student(s)</th>
-                    </tr>
-                    <tr>
-                        <th>Last Name</th>
-                        <th>First Name</th>                        
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
+            <!-- moved  enrollment form above list of enrolled students, as per discussion with Art - Jan18/2015 (LCC) -->
             <form name="frmEnroll" id="frmEnroll" class="form-horizontal" role="form">
 
                 <input type="hidden" name="hdnClassId" id="hdnClassId" value="0"/>
@@ -116,6 +105,23 @@
                     </div>
                 </div>
             </form>
+            <br/>
+            
+            
+            <table border="1" id="tblEnrolledStudents" class="table table-condensed table-bordered table-responsive table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2">Enrolled Student(s)</th>
+                    </tr>
+                    <tr>
+                        <th>Last Name</th>
+                        <th>First Name</th>                        
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            
 
         </div>
     </div>     <!-- div class=row -->
@@ -249,6 +255,11 @@
             $('#frmEnroll input#hdnStudentId').val(0);
             $('#frmEnroll button#btnEnroll').prop('disabled', true);
             $('#frmEnroll input').parent('div').removeClass('has-error');
+            
+            // added Jan18/2015 (LCC)
+            $('#frmClass select#classCourse').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -311,6 +322,11 @@
                     data: $('#frmClass').serialize()
                 }).done(function(data) {
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Class record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmClass #btnClear').trigger( "click" );
+                    
                 });
             }
 
@@ -325,7 +341,6 @@
             select: function( event, ui ) {                
                 //console.log('selected id='+ui.item.id);
                 $('#frmEnroll input#hdnStudentId').val(ui.item.id);
-				return false;
             }
         });
 
@@ -381,6 +396,10 @@
                             $('<tr>').html("<td>" + es.last_name + "</td><td>" + es.first_name + "</td>").appendTo('#tblEnrolledStudents tbody');
                         });  // .each loop
                         $('#frmEnroll button#btnEnroll').prop('disabled', false);
+                        
+                        // added Jan18/2015 (LCC)
+                        $('#frmEnroll button#btnEnroll').notify('Student enrolled',{ className:'success', elementPosition:'right middle' });
+                        
                     });
                 });
             }

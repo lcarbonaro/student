@@ -13,6 +13,10 @@ $c = array();
 $c['id'] = $course->id;
 $c['course_name'] = $course->course_name;
 $c['course_desc'] = $course->course_desc;
+
+// added course type (competitive or recreational) as per discussion with Art - Jan18/2015 (LCC)
+$c['course_type'] = $course->course_type;
+
 $c['class_size_limit'] = $course->class_size_limit;
 $c['active'] = $course->active;
 $courseListArr[] = $c;

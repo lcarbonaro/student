@@ -1,18 +1,24 @@
 body {
-    font-size:8pt;
+    font-size:9px;
     font-weight:normal;
     font-family: Verdana, sans-serif;
 }
 
 .css_right {
-	float:right
+    float:right;
 }
 
 .container-full {
-	margin: 0 auto;
-	width: 100%;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.row-full-height {
-	height: 100%;	
+.form-control {
+    height: 25px;
+    padding: 6px 6px;
+}
+
+.control-label {
+    padding-left: 10px;
+    padding-right: 0px;
 }

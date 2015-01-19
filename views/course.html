@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblCourse" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -31,18 +31,33 @@
                         <input type="text" class="form-control" id="courseDesc" name="courseDesc" />
                     </div>
                 </div>
-
+                
+                <!--  removed class size limit, as per discussion with Art - Jan18/2015 (LCC) -->
+                <!--
                 <div class="form-group" >
                     <label class="col-xs-2 control-label" for="courseClassSizeLimit">Class Size Limit</label>
                     <div class="col-xs-4">
                         <input type="number" class="form-control" id="courseClassSizeLimit" name="courseClassSizeLimit" min="1" />
                     </div>
                 </div>
-
+                -->
+                
+                <!--  added type (competitive,recreational), as per discussion with Art - Jan18/2015 (LCC) -->
+                <div class="form-group" >
+                    <label class="col-xs-2 control-label" for="courseType">Room</label>
+                    <div class="col-xs-4">
+                        <select id="courseType" name="courseType" class="form-control" >
+                            <option value="Comp">Competitive</option>
+                            <option value="Rec">Recreational</option>
+                        </select>
+                    </div>
+                </div>   
+                
                 <div class="form-group" >
                     <label class="col-xs-2 control-label" for="courseActive">Active</label>
                     <div class="col-xs-1 pull-left">
-                        <input type="checkbox" class="form-control" id="courseActive" name="courseActive" />
+                        <!-- active default to checked as per discussion with Art - Jan18/2015 (LCC) -->
+                        <input type="checkbox" class="form-control" id="courseActive" name="courseActive" checked="checked"/>
                     </div>
                 </div>
 
@@ -92,11 +107,17 @@
                 var dataObj = $.parseJSON(data);
                 var rec = dataObj.data[0];
 
-                //populate form                
+                // populate form                
                 $('#frmCourse input#hdnId').val(rec.id);
                 $('#frmCourse input#courseName').val(rec.course_name);
                 $('#frmCourse input#courseDesc').val(rec.course_desc);
-                $('#frmCourse input#courseClassSizeLimit').val(rec.class_size_limit);
+                
+                // commented out class size limit field population, as per discussion with Art - Jan18/2015 (LCC)
+                //$('#frmCourse input#courseClassSizeLimit').val(rec.class_size_limit);
+                
+                // added course type (Comp,Rec) as per discussion with Art - Jan18/2015 (LCC)
+                $('#frmCourse select#courseType').val(rec.course_type);
+                
                 $('#frmCourse input#courseActive').prop('checked', function() {
                     return rec.active == 1;
                 });
@@ -108,6 +129,11 @@
         $('#frmCourse #btnClear').on('click', function() {
             $('#frmCourse input#hdnId').val(0);
             $('#frmCourse').trigger("reset");
+            
+            // added Jan18/2015 (LCC)
+            $('#frmCourse input#courseName').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -125,10 +151,15 @@
                     $('#frmCourse input#courseDesc').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in course description.</span>');
                     hasError = true;
                 } else {
+                    
+                    // commented out class size limit validation, as per discussion with Art - Jan18/2015 (LCC)
+                    /* 
                     if ($('#frmCourse input#courseClassSizeLimit').val() === '' || $('#frmCourse input#courseClassSizeLimit').val() === '0') {
                         $('#frmCourse input#courseClassSizeLimit').after('<span class=\'error\' style=\'color:red;\'>&nbsp;Please fill in class size limit.</span>');
                         hasError = true;
                     }
+                    */
+                   
                 }
             }
             //---------- end of validation checks
@@ -147,6 +178,11 @@
                     data: $('#frmCourse').serialize()
                 }).done(function(data) {
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Course record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmCourse #btnClear').trigger( "click" );
+                    
                 });
             }
             return false;

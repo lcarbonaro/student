@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblRoom" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -90,6 +90,11 @@
         $('#frmRoom #btnClear').on('click', function() {
             $('#frmRoom input#hdnId').val(0);
             $('#frmRoom').trigger("reset");
+            
+            // added Jan18/2015 (LCC)
+            $('#frmRoom input#roomName').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -115,6 +120,11 @@
                     data: $('#frmRoom').serialize()
                 }).done(function(data) {
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Room record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmRoom #btnClear').trigger( "click" );
+                    
                 });
             }
             return false;

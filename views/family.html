@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblFamily" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -191,6 +191,11 @@
             $('#frmRegister input#hdnFamilyId').val(0);
             $('#frmRegister button#btnRegister').prop('disabled', true);
             $('#frmRegister input').parent('div').removeClass('has-error');
+            
+            // added Jan18/2015 (LCC)
+            $('#frmFamily input#familyFirstName').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -226,8 +231,13 @@
                     type: "POST",
                     url: 'backend/family/saveFamily.php',
                     data: $('#frmFamily').serialize()
-                }).done(function(data) {
+                }).done(function(data) {                                        
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Family record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmFamily #btnClear').trigger( "click" );
+                    
                 });
             }
             return false;

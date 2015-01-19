@@ -1,5 +1,5 @@
 <div class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
-    <div class="row row-full-height">
+    <div class="row">
 
         <div class="col-xs-6">
             <table id="tblStudent" class="table table-condensed table-bordered table-responsive table-hover table-striped">
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="form-group" >
-                    <label class="col-xs-2 control-label" for="studentRegDate">Registration Date</label>
+                    <label class="col-xs-2 control-label" for="studentRegDate">Registered On</label>
                     <div class="col-xs-4">
                         <input type="text" class="form-control datepickerReg" id="studentRegDate" name="studentRegDate" />
                     </div>
@@ -97,7 +97,7 @@
 </div>     <!-- div class=ui-tabs-panel -->
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function() {        
 
         var dtStudent = $('#tblStudent').DataTable({
             "bJQueryUI": true,
@@ -173,6 +173,11 @@
             $('#frmStudent input#hdnId').val(0);
             $('#tblClasses tbody').find('tr').remove();
             $('#frmStudent').trigger("reset");
+            
+            // added Jan18/2015 (LCC)
+            $('#frmStudent input#studentFirstName').focus();
+            $('.error').remove();
+            
             return false;
         });
 
@@ -215,6 +220,11 @@
                     data: $('#frmStudent').serialize()
                 }).done(function(data) {
                     dataTableReload();
+                    
+                    // added Jan18/2015 (LCC)
+                    $.notify('Student record saved',{ className:'success', globalPosition:'top centre' });
+                    $('#frmStudent #btnClear').trigger( "click" );
+                    
                 });
             }
             return false;
